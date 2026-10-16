@@ -1,8 +1,8 @@
 library(quantreg)
 source("cup_check.R")
 
-training_data   <- read.csv('train.csv')
-test_predictors <- read.csv("test_predictors.csv")
+training_data   <- read.csv("/Users/alex/Regression-Cup/train.csv")
+test_predictors <- read.csv("/Users/alex/Regression-Cup/test_predictors.csv")
 
 stamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
 f_ols <- paste0("submission_ols_log_", stamp, ".csv")
