@@ -1,5 +1,5 @@
-library(quantreg)
-source("cup_check.R")
+training_data <- read.csv('https://raw.githubusercontent.com/andrewmy615/Regression-Cup/refs/heads/main/train.csv')
+head(training_data)
 
 training_data   <- read.csv("/Users/alex/Regression-Cup/train.csv")
 test_predictors <- read.csv("/Users/alex/Regression-Cup/test_predictors.csv")
