@@ -27,8 +27,10 @@ results_list <- lapply(all_predictors, function(p) {
 })
 
 comparison_df <- do.call(rbind, results_list) 
+comparison_df$avg_skill <- (comparison_df$point_skill + comparison_df$interval_skill) / 2
+comparison_df <- comparison_df[order(-comparison_df$avg_skill), ]
+rownames(comparison_df) <- NULL
 comparison_df |> knitr::kable(digits = 3)
-
 
 # visualizing the top 5 predictors (based on avg of point_skill, interval_skill) 
 top_5 <- c("median_hh_income", "some_college", "adult_smoking", 
@@ -47,6 +49,44 @@ for (i in top_5) {
 }
 par(mfrow = c(1, 1))
 
+# testing log transformations of top 5
+log_results_list <- lapply(top_5, function(p) {
+
+  f <- as.formula(paste("log(ev_rate_per_1k) ~ log(", p, ")"))
+  
+  output <- holdout_check(f, data = train)
+  
+  data.frame(
+    predictor      = paste0("log(", p, ")"),
+    point_skill    = output$average[output$measure == "point_skill"],
+    interval_skill = output$average[output$measure == "interval_skill"],
+    coverage       = output$average[output$measure == "coverage"]
+  )
+})
+
+log_comparison_df <- do.call(rbind, log_results_list)
+log_comparison_df$avg_skill <- (log_comparison_df$point_skill + log_comparison_df$interval_skill) / 2
+log_comparison_df <- log_comparison_df[order(-log_comparison_df$avg_skill), ]
+log_comparison_df |> knitr::kable(digits = 3) |> print()
+
+# plotting the transformations
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+for (p in top_5) {
+  plot(
+    log(train[[p]]), log(train$ev_rate_per_1k),
+    xlab = paste0("log(", p, ")"), 
+    ylab = "log(ev_rate_per_1k)",
+    main = paste0("log(", p, ")"),
+    pch = 16, 
+    col = rgb(0.2, 0.2, 0.5, 0.3),
+    cex = 0.7,
+    cex.main = 0.9
+  )
+  fit_log <- lm(as.formula(paste("log(ev_rate_per_1k) ~ log(", p, ")")), data = train)
+  abline(fit_log, col = "red", lwd = 2)
+}
+
+par(mfrow = c(1, 1))
 
 # median_hh_income best single predictor, M2 submission portion
 library(quantreg)
@@ -62,3 +102,4 @@ write_submission(test$county_id,
 
 summary(fit_M2, digits=3)
 check_submission(M2_submission)
+
