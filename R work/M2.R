@@ -103,3 +103,16 @@ write_submission(test$county_id,
 summary(fit_M2, digits=3)
 check_submission(M2_submission)
 
+#also submit, since we have two attempts, next best is log(adult_smoking)
+
+fit_M2.2  <- lm(log(ev_rate_per_1k) ~ log(adult_smoking), data = train)
+pred_M2.2 <- predict(fit_M2.2, newdata = test,
+                    interval = "prediction", level = 0.90)
+
+M2.2_submission <- "single_predictor_M2_2.csv"
+write_submission(test$county_id,
+                 pred_M2.2[, "fit"], pred_M2.2[, "lwr"], pred_M2.2[, "upr"],
+                 scale = "log", file = M2.2_submission)
+
+summary(fit_M2.2, digits=3)
+check_submission(M2.2_submission)
